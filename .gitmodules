@@ -1,0 +1,7 @@
+[submodule "third_party/nxdk"]
+	path = third_party/nxdk
+	url = https://github.com/abaire/nxdk.git
+	branch = nxdk_pgraph_tester
+[submodule "third_party/printf"]
+	path = third_party/printf
+	url = https://github.com/mpaland/printf.git
