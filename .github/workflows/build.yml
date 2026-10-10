@@ -1,0 +1,122 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/**'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/**'
+      - 'README.md'
+
+jobs:
+  BuildISO:
+    name: Build ISO
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone tree
+      uses: actions/checkout@v7
+      with:
+        submodules: recursive
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          llvm \
+          lld
+        pip3 install nv2a-vsh
+
+    - name: Compile
+      run: |
+        export NXDK_DIR="${GITHUB_WORKSPACE}/third_party/nxdk"
+        cmake -B build \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_TOOLCHAIN_FILE="${NXDK_DIR}/share/toolchain-nxdk.cmake"
+        cmake --build build -- -j$(grep -c processor /proc/cpuinfo)
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: isos
+        path: |
+          build/src/xiso/fpu_test_xiso/fpu_test_xiso.iso
+          build/src/xiso/sse_test_xiso/sse_test_xiso.iso
+
+  CreateRelease:
+    needs: [ BuildISO ]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone tree
+        uses: actions/checkout@v7
+        with:
+          path: nxdk_low_level_cpu_tests
+
+      - name: Calculate version
+        id: calculate-version
+        run: |
+          echo "version=$(date +'%Y-%m-%d_%H-%M-%S-%N')" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v7
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.calculate-version.outputs.version }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: isos
+          path: .
+
+      - name: Create release
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: "Low level CPU tests ${{ steps.tag_version.outputs.new_version }}"
+          prerelease: false
+          draft: false
+          files: |
+            fpu_test_xiso.iso
+            sse_test_xiso.iso
+
+  BuildMacOS:
+    name: Build macOS
+    runs-on: macOS-latest
+
+    steps:
+      - name: Clone tree
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALL_CLEANUP=1
+          brew install \
+            cmake \
+            coreutils \
+            llvm \
+            lld
+          export PIP_BREAK_SYSTEM_PACKAGES=1
+
+      - name: Compile
+        run: |
+          LLVMDIR="$(brew --prefix llvm)"
+          LLDDIR="$(brew --prefix lld)"
+          export PATH="${LLVMDIR}/bin:${LLDDIR}/bin:$PATH"
+          export LDFLAGS="-L${LLVMDIR}/lib/c++ -L${LLVMDIR}/lib -L${LLDDIR}/lib"
+          export CPPFLAGS="-I${LLDDIR}/include"
+
+          export NXDK_DIR="${GITHUB_WORKSPACE}/third_party/nxdk"
+          cmake -B build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_TOOLCHAIN_FILE="${NXDK_DIR}/share/toolchain-nxdk.cmake" \
+                -DDUMP_CONFIG_FILE=OFF
+          cmake --build build -- -j

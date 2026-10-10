@@ -9,6 +9,16 @@ to grow to cover other CPU behaviors.
   x87 `fld`/`fstp` precision-control regression test (verifies that 64-bit
   `fld qword` / `fstp qword` copies are unaffected by the FPU control word's
   precision-control field, as required by the Intel x86 Architecture Manual).
+* sse_test - tests original SSE (SSE1) single-precision floating point behavior:
+  - Non-IEEE Min/Max operand rules (`minss`, `maxss`, `minps`, `maxps`) for NaNs
+    and signed zeros (`+0.0` vs `-0.0`).
+  - Predicated comparisons (`cmpps` 0–7) and CPU `EFLAGS` updates (`comiss`, `ucomiss`),
+    including Quiet NaN signaling differences.
+  - Hardware approximation instructions (`rcpss`, `rcpps`, `rsqrtss`, `rsqrtps`),
+    asserting 12-bit mantissa interpolation bounds and physical Coppermine baseline bit patterns.
+  - `MXCSR` control flags, Flush-to-Zero (`FTZ`) underflow flush and sticky flags,
+    and Denormals-Are-Zeros (`DAZ`) lack of support on Coppermine silicon via `fxsave`.
+
 
 ## CLion
 
@@ -33,7 +43,7 @@ Under Settings > Build, Execution, Deployment > CMake
 1. Set `'target remote' args` to `127.0.0.1:1234`
 1. Set `GDB Server` to the path to the xemu binary
 1. Set `GDB Server args` to
-   `-s -S -dvd_path "$CMakeCurrentBuildDir$/xiso/<your_project_name>_xiso/<your_project_name>_xiso.iso"` (the `-S` is
+   `-s -S -dvd_path "$CMakeCurrentBuildDir$/xiso/$CMakeCurrentTargetName$/$CMakeCurrentTargetName$.iso"` (the `-S` is
    optional and will cause xemu to wait for the debugger to connnect)
 1. Under `Advanced GDB Server Options`
 1. Set "Working directory" to `$ProjectFileDir$`
