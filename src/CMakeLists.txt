@@ -155,3 +155,36 @@ set_source_files_properties(
         COMPILE_OPTIONS
         -masm=intel
 )
+
+# sse_test
+create_test_xiso(
+        sse_test
+        "SSE test"
+        sse_main.cpp
+        logger.cpp
+        logger.h
+        test_suite.h
+        sse_tests/sse_runner_case.h
+        sse_tests/sse_test_common.cpp
+        sse_tests/sse_test_common.h
+        sse_tests/test_sse_min_max.cpp
+        sse_tests/test_sse_min_max.h
+        sse_tests/test_sse_comparisons.cpp
+        sse_tests/test_sse_comparisons.h
+        sse_tests/test_sse_approximations.cpp
+        sse_tests/test_sse_approximations.h
+        sse_tests/test_sse_mxcsr_ftz.cpp
+        sse_tests/test_sse_mxcsr_ftz.h
+)
+
+# SSE test modules use Intel-syntax inline assembly and SSE instructions.
+set_source_files_properties(
+        sse_tests/test_sse_min_max.cpp
+        sse_tests/test_sse_comparisons.cpp
+        sse_tests/test_sse_approximations.cpp
+        sse_tests/test_sse_mxcsr_ftz.cpp
+        PROPERTIES
+        COMPILE_OPTIONS
+        "-masm=intel;-msse"
+)
+

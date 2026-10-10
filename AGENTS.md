@@ -21,3 +21,7 @@ When contributing to or modifying this codebase, the following practices are **m
 
 ## 3. Timing and Hardware Verification Considerations
 - Avoid I/O (such as `LogMsg`, `DbgPrint`, or filesystem writes) between time-sensitive operations, as disk I/O on the Xbox FATX filesystem can take several milliseconds and introduce race conditions.
+
+## 4. String Formatting & `printf` Limitations
+- **PDCLib lacks `%f` and `%e` support**: The default C runtime printf functions (`vsnprintf`, `snprintf`, `printf`, `vprintf`) supplied by PDCLib in `nxdk` do not implement floating-point format specifiers. Using `%f` or `%e` with PDCLib silently drops the values or emits empty output.
+- **Use `third_party/printf`**: For logging or screen rendering involving floating-point numbers, always link against `third_party/printf` and use `vsnprintf_` / `snprintf_` from `printf/printf.h` (or wrap via `pb_print_with_floats` in `test_util.h`).

@@ -5,3 +5,6 @@
 [submodule "third_party/printf"]
 	path = third_party/printf
 	url = https://github.com/mpaland/printf.git
+[submodule "third_party/berkeley-testfloat-3"]
+	path = third_party/berkeley-testfloat-3
+	url = https://github.com/ucb-bar/berkeley-testfloat-3.git
