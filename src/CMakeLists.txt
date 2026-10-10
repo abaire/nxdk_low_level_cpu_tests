@@ -188,3 +188,48 @@ set_source_files_properties(
         "-masm=intel;-msse"
 )
 
+# testfloat_test
+create_test_xiso(
+        testfloat_test
+        "TestFloat test"
+        testfloat_main.cpp
+        logger.cpp
+        logger.h
+        test_suite.h
+        testfloat_tests/testfloat_test_common.cpp
+        testfloat_tests/testfloat_test_common.h
+        testfloat_tests/subjfloat_config.h
+        testfloat_tests/subjfloat_x87.cpp
+        testfloat_tests/test_testfloat_f32.cpp
+        testfloat_tests/test_testfloat_f32.h
+        testfloat_tests/test_testfloat_f64.cpp
+        testfloat_tests/test_testfloat_f64.h
+        testfloat_tests/test_testfloat_extf80.cpp
+        testfloat_tests/test_testfloat_extf80.h
+)
+
+target_link_libraries(
+        testfloat_test
+        PRIVATE
+        testfloat
+        softfloat
+)
+
+target_include_directories(
+        testfloat_test
+        PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/testfloat_tests"
+        "${CMAKE_SOURCE_DIR}/third_party/berkeley-softfloat-3/source/include"
+        "${CMAKE_SOURCE_DIR}/third_party/berkeley-testfloat-3/source"
+        "${CMAKE_SOURCE_DIR}/third_party/berkeley-testfloat-3/build/Linux-386-GCC"
+)
+
+# TestFloat x87 module uses Intel-syntax inline assembly.
+set_source_files_properties(
+        testfloat_tests/subjfloat_x87.cpp
+        PROPERTIES
+        COMPILE_OPTIONS
+        -masm=intel
+)
+
+

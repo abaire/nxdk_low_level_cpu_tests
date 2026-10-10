@@ -18,6 +18,12 @@ to grow to cover other CPU behaviors.
     asserting 12-bit mantissa interpolation bounds and physical Coppermine baseline bit patterns.
   - `MXCSR` control flags, Flush-to-Zero (`FTZ`) underflow flush and sticky flags,
     and Denormals-Are-Zeros (`DAZ`) lack of support on Coppermine silicon via `fxsave`.
+* testfloat_test - integrates Berkeley TestFloat 3 with Berkeley SoftFloat 3 as an
+  IEEE 754 reference oracle to validate x87 FPU hardware compliance in the guest:
+  - Validates `f32`, `f64`, and `extF80` arithmetic (`fadd`, `fsub`, `fmul`, `fdiv`, `fsqrt`),
+    comparisons, and conversions using deterministic Intel-syntax inline assembly (`-masm=intel`).
+  - Exercises all 4 IEEE rounding modes (Nearest/Even, MinMag/Truncate, Downward/-Inf, Upward/+Inf)
+    and all 3 x87 FPU precision-control modes (24-bit single, 53-bit double, 64-bit extended).
 
 
 ## CLion
