@@ -144,4 +144,14 @@ create_test_xiso(
         fpu_tests/fpu_test_common.h
         fpu_tests/test_fpu_basic_arithmetic.cpp
         fpu_tests/test_fpu_basic_arithmetic.h
+        fpu_tests/test_fpu_x87_precision_control.cpp
+        fpu_tests/test_fpu_x87_precision_control.h
+)
+
+# The x87 precision-control test uses Intel-syntax inline assembly.
+set_source_files_properties(
+        fpu_tests/test_fpu_x87_precision_control.cpp
+        PROPERTIES
+        COMPILE_OPTIONS
+        -masm=intel
 )

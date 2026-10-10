@@ -5,8 +5,10 @@ Various tests for low-level, non-graphics/non-audio behavior of the Xbox CPU.
 The initial focus is the x86 floating point unit (FPU); the suite is intended
 to grow to cover other CPU behaviors.
 
-* fpu_test - tests basic single- and double-precision FPU arithmetic (currently
-  a placeholder suite containing one basic-arithmetic test).
+* fpu_test - tests basic single- and double-precision FPU arithmetic, plus an
+  x87 `fld`/`fstp` precision-control regression test (verifies that 64-bit
+  `fld qword` / `fstp qword` copies are unaffected by the FPU control word's
+  precision-control field, as required by the Intel x86 Architecture Manual).
 
 ## CLion
 

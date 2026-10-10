@@ -14,6 +14,7 @@
 
 #include "fpu_tests/fpu_test_common.h"
 #include "fpu_tests/test_fpu_basic_arithmetic.h"
+#include "fpu_tests/test_fpu_x87_precision_control.h"
 #include "logger.h"
 #include "nv2astate.h"
 #include "test_suite.h"
@@ -24,6 +25,7 @@ static const std::string kLogPath =
 
 static constexpr TestCase kTests[] = {
     TestCase::From<TestFpuBasicArithmetic>(),
+    TestCase::From<TestFpuX87PrecisionControl>(),
 };
 
 static void RenderLogScreen() {
