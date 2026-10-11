@@ -5,6 +5,13 @@ Various tests for low-level, non-graphics/non-audio behavior of the Xbox CPU.
 The initial focus is the x86 floating point unit (FPU); the suite is intended
 to grow to cover other CPU behaviors.
 
+***WARNING: The intent of this suite is to allow emulators to check their behavior
+compared to a 1.0 Microsoft Xbox.*** 
+
+***This is not an IEEE compliance suite or in any
+way guaranteed to match documented requirements, it tests demonstrated behavior
+on one specific piece of hardware.***
+
 * fpu_test - tests basic single- and double-precision FPU arithmetic, plus an
   x87 `fld`/`fstp` precision-control regression test (verifies that 64-bit
   `fld qword` / `fstp qword` copies are unaffected by the FPU control word's
