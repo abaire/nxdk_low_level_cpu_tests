@@ -24,7 +24,14 @@ on one specific piece of hardware.***
   - Hardware approximation instructions (`rcpss`, `rcpps`, `rsqrtss`, `rsqrtps`),
     asserting 12-bit mantissa interpolation bounds and physical Coppermine baseline bit patterns.
   - `MXCSR` control flags, Flush-to-Zero (`FTZ`) underflow flush and sticky flags,
-    and Denormals-Are-Zeros (`DAZ`) lack of support on Coppermine silicon via `fxsave`.
+* mmx_test - tests 64-bit MMX SIMD integer behavior and x87 aliasing:
+  - Packed byte, word, and dword arithmetic with wraparound (`paddb/w/d`, `psubb/w/d`), signed saturation (`paddsb/sw`, `psubsb/sw`), and unsigned saturation (`paddusb/usw`, `psubusb/usw`).
+  - Packed word multiplication (`pmullw`, `pmulhw`), and multiply-and-add (`pmaddwd`) including the Intel-documented `-32768 * -32768` overflow edge case.
+  - Bitwise boolean logic (`pand`, `pandn`, `por`, `pxor`), packed equality comparisons (`pcmpeqb/w/d`), and signed greater-than comparisons (`pcmpgtb/w/d`).
+  - Packed shifts (`psllw/d/q`, `psrlw/d/q`, `psraw/d`) by immediate and register counts, asserting out-of-range zeroing and sign-extension fill.
+  - Data packing with saturation (`packsswb`, `packssdw`, `packuswb`) and lane interleaving unpacks (`punpcklbw/wd/dq`, `punpckhbw/wd/dq`).
+  - Pentium III / SSE integer MMX extensions supported on Xbox Celeron: `pavgb/w`, `pminub/maxub`, `pminsw/maxsw`, `pmulhuw`, `pmovmskb`, `pextrw/pinsrw`, `psadbw`, `pshufw`, and `maskmovq`.
+  - Architectural x87/MMX physical register aliasing (`MM0`..`MM7` to `FP0`..`FP7`), tag word modifications (non-empty tags on MMX, `0xFFFF` on `EMMS`, and `0xFF` in `FXSAVE`), data retention across `EMMS`, and stack fault detection on subsequent x87 operations without `EMMS`.
 * testfloat_test - integrates Berkeley TestFloat 3 with Berkeley SoftFloat 3 as an
   IEEE 754 reference oracle to validate x87 FPU hardware compliance in the guest:
   - Validates `f32`, `f64`, and `extF80` arithmetic (`fadd`, `fsub`, `fmul`, `fdiv`, `fsqrt`),

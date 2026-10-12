@@ -25,3 +25,9 @@ When contributing to or modifying this codebase, the following practices are **m
 ## 4. String Formatting & `printf` Limitations
 - **PDCLib lacks `%f` and `%e` support**: The default C runtime printf functions (`vsnprintf`, `snprintf`, `printf`, `vprintf`) supplied by PDCLib in `nxdk` do not implement floating-point format specifiers. Using `%f` or `%e` with PDCLib silently drops the values or emits empty output.
 - **Use `third_party/printf`**: For logging or screen rendering involving floating-point numbers, always link against `third_party/printf` and use `vsnprintf_` / `snprintf_` from `printf/printf.h` (or wrap via `pb_print_with_floats` in `test_util.h`).
+
+## 5. Adding New Test Targets
+- **Update `README.md`**: Whenever a new test executable/XISO is added, update `README.md` to document the test suite, its purpose, and the behaviors/instructions it validates.
+- **Update GitHub Workflow (`.github/workflows/build.yml`)**: Whenever a new test XISO is added, update the GitHub Actions workflow to:
+  - Include `build/src/xiso/<target_name>_xiso/<target_name>_xiso.iso` under `BuildISO`'s `Upload artifacts` step.
+  - Include `<target_name>_xiso/<target_name>_xiso.iso` under `CreateRelease`'s `files` list.

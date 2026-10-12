@@ -188,6 +188,41 @@ set_source_files_properties(
         "-masm=intel;-msse"
 )
 
+# mmx_test
+create_test_xiso(
+        mmx_test
+        "MMX test"
+        mmx_main.cpp
+        logger.cpp
+        logger.h
+        test_suite.h
+        mmx_tests/mmx_test_common.cpp
+        mmx_tests/mmx_test_common.h
+        mmx_tests/test_mmx_arithmetic.cpp
+        mmx_tests/test_mmx_arithmetic.h
+        mmx_tests/test_mmx_logical_compare_shift.cpp
+        mmx_tests/test_mmx_logical_compare_shift.h
+        mmx_tests/test_mmx_pack_unpack.cpp
+        mmx_tests/test_mmx_pack_unpack.h
+        mmx_tests/test_mmx_extensions.cpp
+        mmx_tests/test_mmx_extensions.h
+        mmx_tests/test_mmx_x87_aliasing.cpp
+        mmx_tests/test_mmx_x87_aliasing.h
+)
+
+# MMX test modules use Intel-syntax inline assembly and MMX/SSE instructions.
+set_source_files_properties(
+        mmx_tests/test_mmx_arithmetic.cpp
+        mmx_tests/test_mmx_logical_compare_shift.cpp
+        mmx_tests/test_mmx_pack_unpack.cpp
+        mmx_tests/test_mmx_extensions.cpp
+        mmx_tests/test_mmx_x87_aliasing.cpp
+        PROPERTIES
+        COMPILE_OPTIONS
+        "-masm=intel;-mmmx;-msse"
+)
+
+
 # testfloat_test
 create_test_xiso(
         testfloat_test
