@@ -40,6 +40,21 @@ on one specific piece of hardware.***
     and all 3 x87 FPU precision-control modes (24-bit single, 53-bit double, 64-bit extended).
 
 
+## Headless Execution & Automated Testing
+
+To facilitate automated test runs in tools like `xemu-test`, each test suite checks for an optional configuration file at `c:\test_suite_config.ini` upon startup.
+
+The configuration file supports flat `KEY=VALUE` pairs (lines starting with `#` or `;` are ignored):
+
+* `log_path`: Overrides the exact output path of the log file (e.g., `log_path = c:\test_output.txt` or `log_path = e:\custom_dir\log.txt`). The target drive partition is mounted automatically based on the drive letter.
+* `shutdown`: Enables headless termination (`shutdown = true` or `1`/`yes`/`on`). When set, the system will flush test logs and immediately power down via SMBus rather than waiting for controller input:
+  ```c
+  HalWriteSMBusValue(0x20, 0x02, FALSE, 0x80);
+  ```
+
+If no configuration file is present or keys are omitted, suites write to their default log paths on drive `E:` and wait for controller input (`Black` button / Right Shoulder / Start) to exit.
+
+
 ## CLion
 
 ### Building
