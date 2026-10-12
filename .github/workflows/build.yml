@@ -46,6 +46,7 @@ jobs:
         path: |
           build/src/xiso/fpu_test_xiso/fpu_test_xiso.iso
           build/src/xiso/sse_test_xiso/sse_test_xiso.iso
+          build/src/xiso/sse_test_xiso/testfloat_test_xiso.iso
 
   CreateRelease:
     needs: [ BuildISO ]
@@ -88,6 +89,7 @@ jobs:
           files: |
             fpu_test_xiso/fpu_test_xiso.iso
             sse_test_xiso/sse_test_xiso.iso
+            testfloat_test_xiso/testfloat_test_xiso.iso
 
   BuildMacOS:
     name: Build macOS
