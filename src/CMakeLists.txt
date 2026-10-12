@@ -108,6 +108,8 @@ endmacro()
 add_library(
         test_util
         STATIC
+        test_runner.cpp
+        test_runner.h
         test_util.cpp
         test_util.h
 )
@@ -123,6 +125,7 @@ target_link_libraries(
         PUBLIC
         NXDK::NXDK
         NXDK::NXDK_CXX
+        NXDK::SDL2
         pbkitplusplus
         printf
 )
