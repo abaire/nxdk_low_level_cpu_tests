@@ -19,6 +19,7 @@
 //!    (`fcompp`) match IEEE 754 ordering rules.
 struct TestFloatF32 {
   static constexpr const char* Name() { return "TestFloat F32"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

@@ -108,6 +108,8 @@ endmacro()
 add_library(
         test_util
         STATIC
+        test_log.cpp
+        test_log.h
         test_runner.cpp
         test_runner.h
         test_util.cpp
@@ -140,8 +142,6 @@ create_test_xiso(
         fpu_test
         "FPU test"
         fpu_main.cpp
-        logger.cpp
-        logger.h
         test_suite.h
         fpu_tests/fpu_test_common.cpp
         fpu_tests/fpu_test_common.h
@@ -164,8 +164,6 @@ create_test_xiso(
         sse_test
         "SSE test"
         sse_main.cpp
-        logger.cpp
-        logger.h
         test_suite.h
         sse_tests/sse_runner_case.h
         sse_tests/sse_test_common.cpp
@@ -196,8 +194,6 @@ create_test_xiso(
         mmx_test
         "MMX test"
         mmx_main.cpp
-        logger.cpp
-        logger.h
         test_suite.h
         mmx_tests/mmx_test_common.cpp
         mmx_tests/mmx_test_common.h
@@ -231,8 +227,6 @@ create_test_xiso(
         testfloat_test
         "TestFloat test"
         testfloat_main.cpp
-        logger.cpp
-        logger.h
         test_suite.h
         testfloat_tests/testfloat_test_common.cpp
         testfloat_tests/testfloat_test_common.h

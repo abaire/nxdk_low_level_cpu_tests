@@ -27,6 +27,7 @@
 //!     second MMX register.
 struct TestMmxExtensions {
   static constexpr const char* Name() { return "SSE Integer MMX Extensions"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

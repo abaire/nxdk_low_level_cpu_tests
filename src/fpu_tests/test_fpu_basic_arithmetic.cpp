@@ -3,9 +3,6 @@
 #include "fpu_test_common.h"
 
 bool TestFpuBasicArithmetic::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: FPU Basic Arithmetic (placeholder)\n");
-
   bool pass = true;
 
   double sum = 0.0;
@@ -13,9 +10,10 @@ bool TestFpuBasicArithmetic::Test() {
     sum += static_cast<double>(i);
   }
   if (sum == 500500.0) {
-    LogMsg("  [PASS] double sum(1..1000) == 500500.0 (got %f)\n", sum);
+    TEST_PASS("double sum(1..1000) == 500500.0 (got %f)", sum);
   } else {
-    LogMsg("  [FAIL] double sum(1..1000) != 500500.0 (got %f)\n", sum);
+    TEST_FAIL_EX(TestFields("expected", 500500.0, "actual", sum),
+                 "double sum(1..1000) != 500500.0 (got %f)", sum);
     pass = false;
   }
 
@@ -24,9 +22,10 @@ bool TestFpuBasicArithmetic::Test() {
     factorial *= static_cast<double>(i);
   }
   if (factorial == 3628800.0) {
-    LogMsg("  [PASS] double 10! == 3628800.0 (got %f)\n", factorial);
+    TEST_PASS("double 10! == 3628800.0 (got %f)", factorial);
   } else {
-    LogMsg("  [FAIL] double 10! != 3628800.0 (got %f)\n", factorial);
+    TEST_FAIL_EX(TestFields("expected", 3628800.0, "actual", factorial),
+                 "double 10! != 3628800.0 (got %f)", factorial);
     pass = false;
   }
 
@@ -35,11 +34,12 @@ bool TestFpuBasicArithmetic::Test() {
     float_sum += static_cast<float>(i);
   }
   if (float_sum == 55.0f) {
-    LogMsg("  [PASS] float sum(1..10) == 55.0 (got %f)\n",
-           static_cast<double>(float_sum));
+    TEST_PASS("float sum(1..10) == 55.0 (got %f)",
+              static_cast<double>(float_sum));
   } else {
-    LogMsg("  [FAIL] float sum(1..10) != 55.0 (got %f)\n",
-           static_cast<double>(float_sum));
+    TEST_FAIL_EX(
+        TestFields("expected", 55.0, "actual", static_cast<double>(float_sum)),
+        "float sum(1..10) != 55.0 (got %f)", static_cast<double>(float_sum));
     pass = false;
   }
 

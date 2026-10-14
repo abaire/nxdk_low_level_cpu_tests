@@ -14,6 +14,7 @@
 //!    computed on the FPU equals the closed-form value 55.0f.
 struct TestFpuBasicArithmetic {
   static constexpr const char* Name() { return "FPU Basic Arithmetic"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

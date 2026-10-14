@@ -13,8 +13,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "logger.h"
 #include "nv2astate.h"
+#include "test_log.h"
 #include "test_util.h"
 
 static const std::string kConfigFilePath = R"(c:\test_suite_config.ini)";
@@ -104,9 +104,12 @@ bool TestRunner::SetupLogging() {
     if (last_slash != std::string::npos) {
       EnsureFolderExists(log_path_.substr(0, last_slash));
     }
-    Logger::Initialize(log_path_, true);
-    LogMsg("Mounted Drive %c: and initialized log at %s\n", drive_letter,
-           log_path_.c_str());
+    if (!TestLog::Initialize(log_path_, true)) {
+      return false;
+    }
+    TestLog::BeginSuite(suite_name_);
+    TEST_INFO("Mounted Drive %c: and initialized log at %s", drive_letter,
+              log_path_.c_str());
     return true;
   }
 
@@ -123,7 +126,7 @@ void TestRunner::RenderLogScreen() {
   pb_print("  Xbox CPU (%s) Validation Suite\n", suite_name_.c_str());
   pb_print("============================================================\n\n");
 
-  const auto& log = GetOnScreenLog();
+  const auto& log = TestLog::GetOnScreenLog();
   for (const auto& line : log) {
     pb_print("%s\n", line.c_str());
   }
@@ -136,20 +139,27 @@ void TestRunner::RunAllTests() {
   results_.clear();
   results_.reserve(num_tests_);
 
+  size_t passed = 0;
   for (size_t i = 0; i < num_tests_; ++i) {
+    TestLog::BeginTest(tests_[i].name, tests_[i].source);
     bool result = tests_[i].test_function();
+    TestLog::EndTest(result);
     results_.push_back(result);
+    if (result) {
+      ++passed;
+    }
     RenderLogScreen();
   }
+  TestLog::EndSuite(passed, num_tests_ - passed);
 
   pb_erase_text_screen();
-  ClearOnScreenLog();
+  TestLog::ClearOnScreenLog();
 
   for (size_t i = 0; i < num_tests_; ++i) {
-    LogMsg("  %2d %-32s : %s\n", static_cast<int>(i + 1), tests_[i].name,
-           results_[i] ? "PASS" : "FAIL");
+    TestLog::Print("  %2d %-32s : %s", static_cast<int>(i + 1), tests_[i].name,
+                   results_[i] ? "PASS" : "FAIL");
   }
-  LogMsg("See %s\n\n", log_path_.c_str());
+  TestLog::Print("See %s\n", log_path_.c_str());
 }
 
 void TestRunner::ShutdownSystem() {
@@ -202,7 +212,7 @@ int TestRunner::Run() {
   pb_draw_text_screen();
   PBKitPlusPlus::NV2AState::FinishDraw();
 
-  LogMsg("Running test suite...\n");
+  TEST_INFO("Running test suite...");
   RunAllTests();
 
   if (shutdown_on_completion_) {
@@ -246,7 +256,7 @@ int TestRunner::Run() {
     pb_print("  Xbox CPU (%s) Validation Suite\n", suite_name_.c_str());
     pb_print("Log file: %s\n\n", log_path_.c_str());
 
-    const auto& log = GetOnScreenLog();
+    const auto& log = TestLog::GetOnScreenLog();
     for (const auto& line : log) {
       pb_print("%s\n", line.c_str());
     }

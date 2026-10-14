@@ -9,7 +9,7 @@
 #include "test_suite.h"
 
 static const char* kDefaultLogPath =
-    R"(e:\devkit\nxdk_low_level_cpu_tests\log.txt)";
+    R"(e:\devkit\nxdk_low_level_cpu_tests\log_fpu.json)";
 
 static constexpr TestCase kTests[] = {
     TestCase::From<TestFpuBasicArithmetic>(),

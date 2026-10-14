@@ -7,9 +7,6 @@ extern "C" {
 #include "testfloat_test_common.h"
 
 bool TestFloatExtF80::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: TestFloat ExtF80 Operations\n");
-
   InitializeTestFloatEnvironment();
   bool pass = true;
 

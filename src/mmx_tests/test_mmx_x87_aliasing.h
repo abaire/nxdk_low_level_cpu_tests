@@ -27,6 +27,7 @@
 //!    setting any exception flags in the Status Word.
 struct TestMmxX87Aliasing {
   static constexpr const char* Name() { return "MMX/x87 Aliasing & EMMS"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

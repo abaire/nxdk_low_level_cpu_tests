@@ -24,6 +24,7 @@
 //!    source.
 struct TestMmxPackUnpack {
   static constexpr const char* Name() { return "MMX Pack & Unpack"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

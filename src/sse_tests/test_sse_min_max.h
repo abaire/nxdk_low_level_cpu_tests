@@ -20,6 +20,7 @@
 //!    all four lanes simultaneously.
 struct TestSseMinMax {
   static constexpr const char* Name() { return "SSE Min/Max Non-IEEE Rules"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

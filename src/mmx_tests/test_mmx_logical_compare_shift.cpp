@@ -277,18 +277,17 @@ static uint64_t RunPsradReg(uint64_t val, uint64_t count) {
 static bool CheckResult(const char* op_name, uint64_t actual,
                         uint64_t expected) {
   if (actual == expected) {
-    LogMsg("  [PASS] %-12s : 0x%016llX\n", op_name, actual);
+    TEST_PASS("%-12s : 0x%016llX", op_name, actual);
     return true;
   }
-  LogMsg("  [FAIL] %-12s expected 0x%016llX got 0x%016llX\n", op_name, expected,
-         actual);
+  TEST_FAIL_EX(TestFields("op", op_name, "expected", Hex64(expected), "actual",
+                          Hex64(actual)),
+               "%-12s expected 0x%016llX got 0x%016llX", op_name, expected,
+               actual);
   return false;
 }
 
 bool TestMmxLogicalCompareShift::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: MMX Logical, Compare & Shift\n");
-
   bool pass = true;
 
   // 1. Bitwise logical operations (pand, pandn, por, pxor)

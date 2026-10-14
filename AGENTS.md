@@ -12,21 +12,26 @@ When contributing to or modifying this codebase, the following practices are **m
   - Do not add redundant or obvious comments that merely restate what code does.
   - Do not use decorative block banners or divide test methods into artificial "Part X" sections; if a test is validating distinct behaviors, separate them into distinct `TestCase` structs.
 
-## 2. Code Formatting Requirements
+## 2. Test Logging
+- Tests report results with the macros in `src/test_log.h` (`TEST_PASS`, `TEST_FAIL`, `TEST_INFO`, `TEST_ERROR`, their `_EX` variants taking `TestFields("key", value, ...)`, `TEST_SCOPE`, `TEST_HEXDUMP`). Do not print/log directly; the macros echo to the screen and record structured JSON with the source file and line.
+- Pass register/bit-pattern values as `Hex32(v)` / `Hex64(v)` in `TestFields`, since JSON has no hex literals. Prefer the `_EX` forms for failures that report expected/actual values so post-processing does not need to parse message text.
+- Do not print banners or test names; `TestRunner` opens/closes each test in the log. Every test class must provide `Name()` and `Source()` (`return __FILE__;`).
+
+## 3. Code Formatting Requirements
 - **Run `clang-format`**: Before completing any task, format all newly created or modified source and header files (`*.cpp`, `*.h`, `*.c`) using `clang-format`:
   ```bash
   clang-format -i <path/to/changed/file>
   ```
 - Ensure changes adhere cleanly to repository indentation (2 spaces) and style.
 
-## 3. Timing and Hardware Verification Considerations
-- Avoid I/O (such as `LogMsg`, `DbgPrint`, or filesystem writes) between time-sensitive operations, as disk I/O on the Xbox FATX filesystem can take several milliseconds and introduce race conditions.
+## 4. Timing and Hardware Verification Considerations
+- Avoid I/O (such as the `TEST_*` logging macros, `DbgPrint`, or filesystem writes) between time-sensitive operations, as disk I/O on the Xbox FATX filesystem can take several milliseconds and introduce race conditions.
 
-## 4. String Formatting & `printf` Limitations
+## 5. String Formatting & `printf` Limitations
 - **PDCLib lacks `%f` and `%e` support**: The default C runtime printf functions (`vsnprintf`, `snprintf`, `printf`, `vprintf`) supplied by PDCLib in `nxdk` do not implement floating-point format specifiers. Using `%f` or `%e` with PDCLib silently drops the values or emits empty output.
 - **Use `third_party/printf`**: For logging or screen rendering involving floating-point numbers, always link against `third_party/printf` and use `vsnprintf_` / `snprintf_` from `printf/printf.h` (or wrap via `pb_print_with_floats` in `test_util.h`).
 
-## 5. Adding New Test Targets
+## 6. Adding New Test Targets
 - **Update `README.md`**: Whenever a new test executable/XISO is added, update `README.md` to document the test suite, its purpose, and the behaviors/instructions it validates.
 - **Update GitHub Workflow (`.github/workflows/build.yml`)**: Whenever a new test XISO is added, update the GitHub Actions workflow to:
   - Include `build/src/xiso/<target_name>_xiso/<target_name>_xiso.iso` under `BuildISO`'s `Upload artifacts` step.

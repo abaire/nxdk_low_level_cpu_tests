@@ -6,16 +6,13 @@
 #include <windows.h>
 
 #include <cstdint>
-#include <deque>
 #include <string>
+
+#include "test_log.h"
 
 extern "C" {
 #include "softfloat.h"
 }
-
-void LogMsg(const char* fmt, ...);
-const std::deque<std::string>& GetOnScreenLog();
-void ClearOnScreenLog();
 
 void InitializeTestFloatEnvironment();
 

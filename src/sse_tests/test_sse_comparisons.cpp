@@ -60,9 +60,6 @@ static uint32_t RunUcomiss(const uint32_t a[4], const uint32_t b[4]) {
 }
 
 bool TestSseComparisons::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: SSE Comparisons and Flags\n");
-
   static constexpr uint32_t kTrue = 0xFFFFFFFF;
   static constexpr uint32_t kFalse = 0x00000000;
 
@@ -108,11 +105,16 @@ bool TestSseComparisons::Test() {
     t.fn(out, a, b);
     if (out[0] == t.expected[0] && out[1] == t.expected[1] &&
         out[2] == t.expected[2] && out[3] == t.expected[3]) {
-      LogMsg("  [PASS] cmpps %-10s\n", t.name);
+      TEST_PASS("cmpps %-10s", t.name);
     } else {
-      LogMsg(
-          "  [FAIL] cmpps %-10s exp (0x%08X,0x%08X,0x%08X,0x%08X) got "
-          "(0x%08X,0x%08X,0x%08X,0x%08X)\n",
+      TEST_FAIL_EX(
+          TestFields("predicate", t.name, "expected0", Hex32(t.expected[0]),
+                     "expected1", Hex32(t.expected[1]), "expected2",
+                     Hex32(t.expected[2]), "expected3", Hex32(t.expected[3]),
+                     "actual0", Hex32(out[0]), "actual1", Hex32(out[1]),
+                     "actual2", Hex32(out[2]), "actual3", Hex32(out[3])),
+          "cmpps %-10s exp (0x%08X,0x%08X,0x%08X,0x%08X) got "
+          "(0x%08X,0x%08X,0x%08X,0x%08X)",
           t.name, t.expected[0], t.expected[1], t.expected[2], t.expected[3],
           out[0], out[1], out[2], out[3]);
       pass = false;
@@ -138,23 +140,29 @@ bool TestSseComparisons::Test() {
 
     uint32_t flags = RunComiss(op_a, op_b) & kEflagsCompareMask;
     if (flags == ft.exp_flags) {
-      LogMsg("  [PASS] comiss  %-22s flags: ZF=%d PF=%d CF=%d\n", ft.name,
-             (flags & kZfMask) != 0, (flags & kPfMask) != 0,
-             (flags & kCfMask) != 0);
+      TEST_PASS("comiss  %-22s flags: ZF=%d PF=%d CF=%d", ft.name,
+                (flags & kZfMask) != 0, (flags & kPfMask) != 0,
+                (flags & kCfMask) != 0);
     } else {
-      LogMsg("  [FAIL] comiss  %-22s exp flags: 0x%02X got 0x%02X\n", ft.name,
-             ft.exp_flags, flags);
+      TEST_FAIL_EX(
+          TestFields("op", "comiss", "case", ft.name, "expected_eflags",
+                     Hex32(ft.exp_flags), "actual_eflags", Hex32(flags)),
+          "comiss  %-22s exp flags: 0x%02X got 0x%02X", ft.name, ft.exp_flags,
+          flags);
       pass = false;
     }
 
     flags = RunUcomiss(op_a, op_b) & kEflagsCompareMask;
     if (flags == ft.exp_flags) {
-      LogMsg("  [PASS] ucomiss %-22s flags: ZF=%d PF=%d CF=%d\n", ft.name,
-             (flags & kZfMask) != 0, (flags & kPfMask) != 0,
-             (flags & kCfMask) != 0);
+      TEST_PASS("ucomiss %-22s flags: ZF=%d PF=%d CF=%d", ft.name,
+                (flags & kZfMask) != 0, (flags & kPfMask) != 0,
+                (flags & kCfMask) != 0);
     } else {
-      LogMsg("  [FAIL] ucomiss %-22s exp flags: 0x%02X got 0x%02X\n", ft.name,
-             ft.exp_flags, flags);
+      TEST_FAIL_EX(
+          TestFields("op", "ucomiss", "case", ft.name, "expected_eflags",
+                     Hex32(ft.exp_flags), "actual_eflags", Hex32(flags)),
+          "ucomiss %-22s exp flags: 0x%02X got 0x%02X", ft.name, ft.exp_flags,
+          flags);
       pass = false;
     }
   }
@@ -171,12 +179,9 @@ bool TestSseComparisons::Test() {
   RunUcomiss(qnan_a, qnan_b);
   uint32_t ucom_mxcsr = ReadMxcsr();
   if ((ucom_mxcsr & 0x01u) == 0) {
-    LogMsg(
-        "  [PASS] ucomiss with QNaN did not set MXCSR Invalid Flag (IE=0)\n");
+    TEST_PASS("ucomiss with QNaN did not set MXCSR Invalid Flag (IE=0)");
   } else {
-    LogMsg(
-        "  [FAIL] ucomiss with QNaN erroneously set MXCSR Invalid Flag "
-        "(IE=1)\n");
+    TEST_FAIL("ucomiss with QNaN erroneously set MXCSR Invalid Flag (IE=1)");
     pass = false;
   }
 
@@ -185,9 +190,9 @@ bool TestSseComparisons::Test() {
   RunComiss(qnan_a, qnan_b);
   uint32_t com_mxcsr = ReadMxcsr();
   if ((com_mxcsr & 0x01u) == 0x01u) {
-    LogMsg("  [PASS] comiss with QNaN set MXCSR Invalid Flag (IE=1)\n");
+    TEST_PASS("comiss with QNaN set MXCSR Invalid Flag (IE=1)");
   } else {
-    LogMsg("  [FAIL] comiss with QNaN did not set MXCSR Invalid Flag (IE=0)\n");
+    TEST_FAIL("comiss with QNaN did not set MXCSR Invalid Flag (IE=0)");
     pass = false;
   }
 

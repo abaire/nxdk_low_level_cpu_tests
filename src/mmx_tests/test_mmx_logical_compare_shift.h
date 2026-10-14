@@ -26,6 +26,7 @@
 //!    replicate sign bits for arithmetic right shifts.
 struct TestMmxLogicalCompareShift {
   static constexpr const char* Name() { return "MMX Logical, Compare & Shift"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

@@ -186,18 +186,17 @@ static void RunMaskmovq(uint8_t dest[8], uint64_t src, uint64_t mask) {
 static bool CheckResult(const char* op_name, uint64_t actual,
                         uint64_t expected) {
   if (actual == expected) {
-    LogMsg("  [PASS] %-12s : 0x%016llX\n", op_name, actual);
+    TEST_PASS("%-12s : 0x%016llX", op_name, actual);
     return true;
   }
-  LogMsg("  [FAIL] %-12s expected 0x%016llX got 0x%016llX\n", op_name, expected,
-         actual);
+  TEST_FAIL_EX(TestFields("op", op_name, "expected", Hex64(expected), "actual",
+                          Hex64(actual)),
+               "%-12s expected 0x%016llX got 0x%016llX", op_name, expected,
+               actual);
   return false;
 }
 
 bool TestMmxExtensions::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: SSE Integer MMX Extensions\n");
-
   bool pass = true;
 
   // 1. Packed average with rounding up (pavgb, pavgw)
@@ -231,9 +230,11 @@ bool TestMmxExtensions::Test() {
   const uint64_t a_mask = 0x8000800080800080ULL;
   uint32_t mask_res = RunPmovmskb(a_mask);
   if (mask_res == 0x000000ADu) {
-    LogMsg("  [PASS] pmovmskb     : 0x%08X\n", mask_res);
+    TEST_PASS("pmovmskb     : 0x%08X", mask_res);
   } else {
-    LogMsg("  [FAIL] pmovmskb expected 0x000000AD got 0x%08X\n", mask_res);
+    TEST_FAIL_EX(TestFields("op", "pmovmskb", "expected", Hex32(0xADu),
+                            "actual", Hex32(mask_res)),
+                 "pmovmskb expected 0x000000AD got 0x%08X", mask_res);
     pass = false;
   }
 
@@ -242,12 +243,14 @@ bool TestMmxExtensions::Test() {
   uint32_t ext0 = RunPextrw0(a_ext);
   uint32_t ext2 = RunPextrw2(a_ext);
   if (ext0 == 0xDEF0u && ext2 == 0x5678u) {
-    LogMsg("  [PASS] pextrw       : lane0=0x%04X lane2=0x%04X\n", ext0, ext2);
+    TEST_PASS("pextrw       : lane0=0x%04X lane2=0x%04X", ext0, ext2);
   } else {
-    LogMsg(
-        "  [FAIL] pextrw lane0 expected 0xDEF0 got 0x%04X, lane2 expected "
-        "0x5678 got 0x%04X\n",
-        ext0, ext2);
+    TEST_FAIL_EX(TestFields("op", "pextrw", "lane0_expected", Hex32(0xDEF0u),
+                            "lane0_actual", Hex32(ext0), "lane2_expected",
+                            Hex32(0x5678u), "lane2_actual", Hex32(ext2)),
+                 "pextrw lane0 expected 0xDEF0 got 0x%04X, lane2 expected "
+                 "0x5678 got 0x%04X",
+                 ext0, ext2);
     pass = false;
   }
 

@@ -60,9 +60,6 @@ static uint32_t AsUint32(float f) {
 }
 
 bool TestSseApproximations::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: SSE Approximations (rcp/rsqrt)\n");
-
   const uint32_t orig_mxcsr = ReadMxcsr();
   bool pass = true;
 
@@ -80,10 +77,13 @@ bool TestSseApproximations::Test() {
     float res = AsFloat(out[0]);
     float rel_err = std::fabs((res - true_rcp) / true_rcp);
     if (rel_err <= 0.0003662109375f) {
-      LogMsg("  [PASS] rcpss(%f) = %f (0x%08X), rel_err = %e\n", val, res,
-             out[0], rel_err);
+      TEST_PASS("rcpss(%f) = %f (0x%08X), rel_err = %e", val, res, out[0],
+                rel_err);
     } else {
-      LogMsg("  [FAIL] rcpss(%f) rel_err %e exceeds 1.5*2^-12\n", val, rel_err);
+      TEST_FAIL_EX(TestFields("op", "rcpss", "input", static_cast<double>(val),
+                              "rel_err", static_cast<double>(rel_err),
+                              "max_rel_err", 0.0003662109375),
+                   "rcpss(%f) rel_err %e exceeds 1.5*2^-12", val, rel_err);
       pass = false;
     }
   }
@@ -100,11 +100,15 @@ bool TestSseApproximations::Test() {
     in[0] = AsUint32(item.input);
     RunRcpss(out, in);
     if (out[0] == item.expected_hex) {
-      LogMsg("  [PASS] rcpss(%f) hardware bit pattern exact: 0x%08X\n",
-             item.input, out[0]);
+      TEST_PASS("rcpss(%f) hardware bit pattern exact: 0x%08X", item.input,
+                out[0]);
     } else {
-      LogMsg("  [FAIL] rcpss(%f) expected 0x%08X got 0x%08X\n", item.input,
-             item.expected_hex, out[0]);
+      TEST_FAIL_EX(
+          TestFields("op", "rcpss", "input", static_cast<double>(item.input),
+                     "expected", Hex32(item.expected_hex), "actual",
+                     Hex32(out[0])),
+          "rcpss(%f) expected 0x%08X got 0x%08X", item.input, item.expected_hex,
+          out[0]);
       pass = false;
     }
   }
@@ -117,11 +121,12 @@ bool TestSseApproximations::Test() {
   RunRcpss(out, in);
   uint32_t sticky_flags = ReadMxcsr() & 0x3Fu;
   if (out[0] == 0x7F800000 && sticky_flags == 0) {
-    LogMsg("  [PASS] rcpss(+0.0f) == +Inf (0x%08X) with no MXCSR exceptions\n",
-           out[0]);
+    TEST_PASS("rcpss(+0.0f) == +Inf (0x%08X) with no MXCSR exceptions", out[0]);
   } else {
-    LogMsg("  [FAIL] rcpss(+0.0f) exp +Inf, flags=0 got 0x%08X flags=0x%02X\n",
-           out[0], sticky_flags);
+    TEST_FAIL_EX(TestFields("expected", Hex32(0x7F800000u), "actual",
+                            Hex32(out[0]), "mxcsr_flags", Hex32(sticky_flags)),
+                 "rcpss(+0.0f) exp +Inf, flags=0 got 0x%08X flags=0x%02X",
+                 out[0], sticky_flags);
     pass = false;
   }
 
@@ -130,11 +135,12 @@ bool TestSseApproximations::Test() {
   RunRcpss(out, in);
   sticky_flags = ReadMxcsr() & 0x3Fu;
   if (out[0] == 0xFF800000 && sticky_flags == 0) {
-    LogMsg("  [PASS] rcpss(-0.0f) == -Inf (0x%08X) with no MXCSR exceptions\n",
-           out[0]);
+    TEST_PASS("rcpss(-0.0f) == -Inf (0x%08X) with no MXCSR exceptions", out[0]);
   } else {
-    LogMsg("  [FAIL] rcpss(-0.0f) exp -Inf, flags=0 got 0x%08X flags=0x%02X\n",
-           out[0], sticky_flags);
+    TEST_FAIL_EX(TestFields("expected", Hex32(0xFF800000u), "actual",
+                            Hex32(out[0]), "mxcsr_flags", Hex32(sticky_flags)),
+                 "rcpss(-0.0f) exp -Inf, flags=0 got 0x%08X flags=0x%02X",
+                 out[0], sticky_flags);
     pass = false;
   }
 
@@ -148,11 +154,14 @@ bool TestSseApproximations::Test() {
     float res = AsFloat(out[0]);
     float rel_err = std::fabs((res - true_rsqrt) / true_rsqrt);
     if (rel_err <= 0.0003662109375f) {
-      LogMsg("  [PASS] rsqrtss(%f) = %f (0x%08X), rel_err = %e\n", val, res,
-             out[0], rel_err);
+      TEST_PASS("rsqrtss(%f) = %f (0x%08X), rel_err = %e", val, res, out[0],
+                rel_err);
     } else {
-      LogMsg("  [FAIL] rsqrtss(%f) rel_err %e exceeds 1.5*2^-12\n", val,
-             rel_err);
+      TEST_FAIL_EX(
+          TestFields("op", "rsqrtss", "input", static_cast<double>(val),
+                     "rel_err", static_cast<double>(rel_err), "max_rel_err",
+                     0.0003662109375),
+          "rsqrtss(%f) rel_err %e exceeds 1.5*2^-12", val, rel_err);
       pass = false;
     }
   }
@@ -171,11 +180,15 @@ bool TestSseApproximations::Test() {
     in[0] = AsUint32(item.input);
     RunRsqrtss(out, in);
     if (out[0] == item.expected_hex) {
-      LogMsg("  [PASS] rsqrtss(%f) hardware bit pattern exact: 0x%08X\n",
-             item.input, out[0]);
+      TEST_PASS("rsqrtss(%f) hardware bit pattern exact: 0x%08X", item.input,
+                out[0]);
     } else {
-      LogMsg("  [FAIL] rsqrtss(%f) expected 0x%08X got 0x%08X\n", item.input,
-             item.expected_hex, out[0]);
+      TEST_FAIL_EX(
+          TestFields("op", "rsqrtss", "input", static_cast<double>(item.input),
+                     "expected", Hex32(item.expected_hex), "actual",
+                     Hex32(out[0])),
+          "rsqrtss(%f) expected 0x%08X got 0x%08X", item.input,
+          item.expected_hex, out[0]);
       pass = false;
     }
   }
@@ -187,14 +200,14 @@ bool TestSseApproximations::Test() {
   RunRsqrtss(out, in);
   sticky_flags = ReadMxcsr() & 0x3Fu;
   if (out[0] == 0xFFC00000 && sticky_flags == 0) {
-    LogMsg(
-        "  [PASS] rsqrtss(-1.0f) == QNaN (0x%08X) with no MXCSR exceptions\n",
-        out[0]);
+    TEST_PASS("rsqrtss(-1.0f) == QNaN (0x%08X) with no MXCSR exceptions",
+              out[0]);
   } else {
-    LogMsg(
-        "  [FAIL] rsqrtss(-1.0f) exp 0xFFC00000 flags=0 got 0x%08X "
-        "flags=0x%02X\n",
-        out[0], sticky_flags);
+    TEST_FAIL_EX(
+        TestFields("expected", Hex32(0xFFC00000u), "actual", Hex32(out[0]),
+                   "mxcsr_flags", Hex32(sticky_flags)),
+        "rsqrtss(-1.0f) exp 0xFFC00000 flags=0 got 0x%08X flags=0x%02X", out[0],
+        sticky_flags);
     pass = false;
   }
 
@@ -210,14 +223,16 @@ bool TestSseApproximations::Test() {
     alignas(16) uint32_t sc_in[4] = {in[i], 0, 0, 0};
     RunRcpss(scalar_rcp, sc_in);
     if (out[i] != scalar_rcp[0]) {
-      LogMsg("  [FAIL] rcpps lane %d (0x%08X) != rcpss (0x%08X)\n", i, out[i],
-             scalar_rcp[0]);
+      TEST_FAIL_EX(TestFields("lane", i, "rcpps", Hex32(out[i]), "rcpss",
+                              Hex32(scalar_rcp[0])),
+                   "rcpps lane %d (0x%08X) != rcpss (0x%08X)", i, out[i],
+                   scalar_rcp[0]);
       rcpps_pass = false;
       pass = false;
     }
   }
   if (rcpps_pass) {
-    LogMsg("  [PASS] rcpps matches rcpss across all 4 vector lanes\n");
+    TEST_PASS("rcpps matches rcpss across all 4 vector lanes");
   }
 
   RunRsqrtps(out, in);
@@ -226,14 +241,16 @@ bool TestSseApproximations::Test() {
     alignas(16) uint32_t sc_in[4] = {in[i], 0, 0, 0};
     RunRsqrtss(scalar_rcp, sc_in);
     if (out[i] != scalar_rcp[0]) {
-      LogMsg("  [FAIL] rsqrtps lane %d (0x%08X) != rsqrtss (0x%08X)\n", i,
-             out[i], scalar_rcp[0]);
+      TEST_FAIL_EX(TestFields("lane", i, "rsqrtps", Hex32(out[i]), "rsqrtss",
+                              Hex32(scalar_rcp[0])),
+                   "rsqrtps lane %d (0x%08X) != rsqrtss (0x%08X)", i, out[i],
+                   scalar_rcp[0]);
       rsqrtps_pass = false;
       pass = false;
     }
   }
   if (rsqrtps_pass) {
-    LogMsg("  [PASS] rsqrtps matches rsqrtss across all 4 vector lanes\n");
+    TEST_PASS("rsqrtps matches rsqrtss across all 4 vector lanes");
   }
 
   WriteMxcsr(orig_mxcsr);

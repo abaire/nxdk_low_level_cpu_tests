@@ -12,7 +12,7 @@
 #include "test_suite.h"
 
 static const char* kDefaultLogPath =
-    R"(e:\devkit\nxdk_low_level_cpu_tests\log_mmx.txt)";
+    R"(e:\devkit\nxdk_low_level_cpu_tests\log_mmx.json)";
 
 static constexpr TestCase kTests[] = {
     TestCase::From<TestMmxArithmetic>(),

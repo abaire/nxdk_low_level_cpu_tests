@@ -64,9 +64,6 @@ static float64_t x87_oracle_f64_div(float64_t a, float64_t b) {
 }
 
 bool TestFloatF64::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: TestFloat F64 Operations\n");
-
   InitializeTestFloatEnvironment();
   bool pass = true;
 
