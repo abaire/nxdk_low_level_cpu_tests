@@ -36,7 +36,8 @@ jobs:
         export NXDK_DIR="${GITHUB_WORKSPACE}/third_party/nxdk"
         cmake -B build \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_TOOLCHAIN_FILE="${NXDK_DIR}/share/toolchain-nxdk.cmake"
+              -DCMAKE_TOOLCHAIN_FILE="${NXDK_DIR}/share/toolchain-nxdk.cmake" \
+              -DLOCATION_URL_BASE:STRING="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}"
         cmake --build build -- -j$(grep -c processor /proc/cpuinfo)
 
     - name: Upload artifacts
@@ -127,5 +128,6 @@ jobs:
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_TOOLCHAIN_FILE="${NXDK_DIR}/share/toolchain-nxdk.cmake" \
-                -DDUMP_CONFIG_FILE=OFF
+                -DDUMP_CONFIG_FILE=OFF \
+                -DLOCATION_URL_BASE:STRING="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}"
           cmake --build build -- -j
