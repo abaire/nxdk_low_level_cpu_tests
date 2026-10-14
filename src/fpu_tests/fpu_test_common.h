@@ -6,11 +6,8 @@
 #include <windows.h>
 
 #include <cstdint>
-#include <deque>
 #include <string>
 
-void LogMsg(const char* fmt, ...);
-const std::deque<std::string>& GetOnScreenLog();
-void ClearOnScreenLog();
+#include "test_log.h"
 
 #endif  // NXDK_LOW_LEVEL_CPU_TESTS_FPU_TEST_COMMON_H

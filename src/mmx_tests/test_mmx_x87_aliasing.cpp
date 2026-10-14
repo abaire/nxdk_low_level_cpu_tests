@@ -28,9 +28,6 @@ static void SaveFxsave(uint8_t fx_buf[512]) {
 }
 
 bool TestMmxX87Aliasing::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: MMX/x87 Aliasing & EMMS\n");
-
   bool pass = true;
 
   // 1. Direct physical register aliasing (MM0 -> FP0, MM7 -> FP7) and exponent
@@ -57,23 +54,29 @@ bool TestMmxX87Aliasing::Test() {
     uint16_t fp7_exp = *reinterpret_cast<uint16_t*>(&fx_buf[152]);
 
     if (fp0_mantissa == kPatternMm0 && fp0_exp == 0xFFFF) {
-      LogMsg("  [PASS] MM0 aliases FP0 mantissa 0x%016llX, exp=0x%04X\n",
-             fp0_mantissa, fp0_exp);
+      TEST_PASS("MM0 aliases FP0 mantissa 0x%016llX, exp=0x%04X", fp0_mantissa,
+                fp0_exp);
     } else {
-      LogMsg(
-          "  [FAIL] FP0 expected mantissa 0x%016llX exp 0xFFFF, got "
-          "0x%016llX exp 0x%04X\n",
+      TEST_FAIL_EX(
+          TestFields("register", "FP0", "expected_mantissa", Hex64(kPatternMm0),
+                     "actual_mantissa", Hex64(fp0_mantissa), "expected_exp",
+                     Hex32(0xFFFFu), "actual_exp", Hex32(fp0_exp)),
+          "FP0 expected mantissa 0x%016llX exp 0xFFFF, got 0x%016llX exp "
+          "0x%04X",
           kPatternMm0, fp0_mantissa, fp0_exp);
       pass = false;
     }
 
     if (fp7_mantissa == kPatternMm7 && fp7_exp == 0xFFFF) {
-      LogMsg("  [PASS] MM7 aliases FP7 mantissa 0x%016llX, exp=0x%04X\n",
-             fp7_mantissa, fp7_exp);
+      TEST_PASS("MM7 aliases FP7 mantissa 0x%016llX, exp=0x%04X", fp7_mantissa,
+                fp7_exp);
     } else {
-      LogMsg(
-          "  [FAIL] FP7 expected mantissa 0x%016llX exp 0xFFFF, got "
-          "0x%016llX exp 0x%04X\n",
+      TEST_FAIL_EX(
+          TestFields("register", "FP7", "expected_mantissa", Hex64(kPatternMm7),
+                     "actual_mantissa", Hex64(fp7_mantissa), "expected_exp",
+                     Hex32(0xFFFFu), "actual_exp", Hex32(fp7_exp)),
+          "FP7 expected mantissa 0x%016llX exp 0xFFFF, got 0x%016llX exp "
+          "0x%04X",
           kPatternMm7, fp7_mantissa, fp7_exp);
       pass = false;
     }
@@ -95,10 +98,12 @@ bool TestMmxX87Aliasing::Test() {
     // 1.0 in 80-bit extended has explicit integer bit 1, so mantissa is
     // 0x8000000000000000ULL
     if (mm7_read == 0x8000000000000000ULL) {
-      LogMsg("  [PASS] fld1 mantissa read from MM7: 0x%016llX\n", mm7_read);
+      TEST_PASS("fld1 mantissa read from MM7: 0x%016llX", mm7_read);
     } else {
-      LogMsg("  [FAIL] MM7 read expected 0x8000000000000000 got 0x%016llX\n",
-             mm7_read);
+      TEST_FAIL_EX(TestFields("expected", Hex64(0x8000000000000000ULL),
+                              "actual", Hex64(mm7_read)),
+                   "MM7 read expected 0x8000000000000000 got 0x%016llX",
+                   mm7_read);
       pass = false;
     }
   }
@@ -116,12 +121,13 @@ bool TestMmxX87Aliasing::Test() {
     uint16_t top_init = (env_init.status_word >> 11) & 0x7;
 
     if (tag_init == 0xFFFF && fx_tag_init == 0x00 && top_init == 0) {
-      LogMsg("  [PASS] fninit: FNSTENV tag=0x%04X, FXSAVE tag=0x%02X, TOP=%d\n",
-             tag_init, fx_tag_init, top_init);
+      TEST_PASS("fninit: FNSTENV tag=0x%04X, FXSAVE tag=0x%02X, TOP=%d",
+                tag_init, fx_tag_init, top_init);
     } else {
-      LogMsg(
-          "  [FAIL] fninit tag expected 0xFFFF/0x00/0 got 0x%04X/0x%02X/%d\n",
-          tag_init, fx_tag_init, top_init);
+      TEST_FAIL_EX(TestFields("fnstenv_tag", Hex32(tag_init), "fxsave_tag",
+                              Hex32(fx_tag_init), "top", top_init),
+                   "fninit tag expected 0xFFFF/0x00/0 got 0x%04X/0x%02X/%d",
+                   tag_init, fx_tag_init, top_init);
       pass = false;
     }
 
@@ -147,15 +153,14 @@ bool TestMmxX87Aliasing::Test() {
     }
 
     if (no_empty_tags && fx_tag_mmx == 0xFF && top_mmx == 0) {
-      LogMsg(
-          "  [PASS] MMX: FNSTENV tag=0x%04X (all non-empty), FXSAVE "
-          "tag=0x%02X, "
-          "TOP=%d\n",
+      TEST_PASS(
+          "MMX: FNSTENV tag=0x%04X (all non-empty), FXSAVE tag=0x%02X, TOP=%d",
           tag_mmx, fx_tag_mmx, top_mmx);
     } else {
-      LogMsg(
-          "  [FAIL] MMX tag expected non-empty/0xFF/0 got 0x%04X/0x%02X/%d\n",
-          tag_mmx, fx_tag_mmx, top_mmx);
+      TEST_FAIL_EX(TestFields("fnstenv_tag", Hex32(tag_mmx), "fxsave_tag",
+                              Hex32(fx_tag_mmx), "top", top_mmx),
+                   "MMX tag expected non-empty/0xFF/0 got 0x%04X/0x%02X/%d",
+                   tag_mmx, fx_tag_mmx, top_mmx);
       pass = false;
     }
 
@@ -172,11 +177,13 @@ bool TestMmxX87Aliasing::Test() {
     uint16_t top_emms = (env_emms.status_word >> 11) & 0x7;
 
     if (tag_emms == 0xFFFF && fx_tag_emms == 0x00 && top_emms == 0) {
-      LogMsg("  [PASS] EMMS: FNSTENV tag=0x%04X, FXSAVE tag=0x%02X, TOP=%d\n",
-             tag_emms, fx_tag_emms, top_emms);
+      TEST_PASS("EMMS: FNSTENV tag=0x%04X, FXSAVE tag=0x%02X, TOP=%d", tag_emms,
+                fx_tag_emms, top_emms);
     } else {
-      LogMsg("  [FAIL] EMMS tag expected 0xFFFF/0x00/0 got 0x%04X/0x%02X/%d\n",
-             tag_emms, fx_tag_emms, top_emms);
+      TEST_FAIL_EX(TestFields("fnstenv_tag", Hex32(tag_emms), "fxsave_tag",
+                              Hex32(fx_tag_emms), "top", top_emms),
+                   "EMMS tag expected 0xFFFF/0x00/0 got 0x%04X/0x%02X/%d",
+                   tag_emms, fx_tag_emms, top_emms);
       pass = false;
     }
   }
@@ -196,10 +203,12 @@ bool TestMmxX87Aliasing::Test() {
         : "mm3");
 
     if (read_back == kPatternMm3) {
-      LogMsg("  [PASS] MM3 data retained across EMMS: 0x%016llX\n", read_back);
+      TEST_PASS("MM3 data retained across EMMS: 0x%016llX", read_back);
     } else {
-      LogMsg("  [FAIL] MM3 expected 0x%016llX got 0x%016llX\n", kPatternMm3,
-             read_back);
+      TEST_FAIL_EX(TestFields("expected", Hex64(kPatternMm3), "actual",
+                              Hex64(read_back)),
+                   "MM3 expected 0x%016llX got 0x%016llX", kPatternMm3,
+                   read_back);
       pass = false;
     }
   }
@@ -226,14 +235,12 @@ bool TestMmxX87Aliasing::Test() {
     // Mask for IE (bit 0 = 0x0001), SF (bit 6 = 0x0040), C1 (bit 9 = 0x0200)
     bool has_fault = (sw & 0x0241) == 0x0241;
     if (has_fault) {
-      LogMsg(
-          "  [PASS] fld1 without EMMS raised Stack Overflow Fault: "
-          "FSW=0x%04X\n",
-          sw);
+      TEST_PASS("fld1 without EMMS raised Stack Overflow Fault: FSW=0x%04X",
+                sw);
     } else {
-      LogMsg(
-          "  [FAIL] fld1 without EMMS expected FSW bits 0x0241 (IE+SF+C1), got "
-          "0x%04X\n",
+      TEST_FAIL_EX(
+          TestFields("expected_fsw_bits", Hex32(0x0241u), "fsw", Hex32(sw)),
+          "fld1 without EMMS expected FSW bits 0x0241 (IE+SF+C1), got 0x%04X",
           sw);
       pass = false;
     }
@@ -258,10 +265,10 @@ bool TestMmxX87Aliasing::Test() {
 
     bool clean_push = (sw & 0x0241) == 0;
     if (clean_push) {
-      LogMsg("  [PASS] fld1 after EMMS pushed cleanly: FSW=0x%04X\n", sw);
+      TEST_PASS("fld1 after EMMS pushed cleanly: FSW=0x%04X", sw);
     } else {
-      LogMsg("  [FAIL] fld1 after EMMS had exception flags in FSW: 0x%04X\n",
-             sw);
+      TEST_FAIL_EX(TestFields("fsw", Hex32(sw)),
+                   "fld1 after EMMS had exception flags in FSW: 0x%04X", sw);
       pass = false;
     }
   }

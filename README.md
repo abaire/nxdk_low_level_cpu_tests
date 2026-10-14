@@ -6,7 +6,7 @@ The initial focus is the x86 floating point unit (FPU); the suite is intended
 to grow to cover other CPU behaviors.
 
 ***WARNING: The intent of this suite is to allow emulators to check their behavior
-compared to a 1.0 Microsoft Xbox.*** 
+compared to a 1.0 Microsoft Xbox.***
 
 ***This is not an IEEE compliance suite or in any
 way guaranteed to match documented requirements, it tests demonstrated behavior
@@ -46,10 +46,47 @@ To facilitate automated test runs in tools like `xemu-test`, each test suite che
 
 The configuration file supports flat `KEY=VALUE` pairs (lines starting with `#` or `;` are ignored):
 
-* `log_path`: Overrides the exact output path of the log file (e.g., `log_path = c:\test_output.txt` or `log_path = e:\custom_dir\log.txt`). The target drive partition is mounted automatically based on the drive letter.
+* `log_path`: Overrides the exact output path of the log file (e.g., `log_path = c:\test_output.json` or `log_path = e:\custom_dir\log.json`). The target drive partition is mounted automatically based on the drive letter.
 * `shutdown`: Enables headless termination (`shutdown = true` or `1`/`yes`/`on`). When set, the system will flush test logs and immediately power down.
 
 If no configuration file is present or keys are omitted, suites write to their default log paths and wait for controller input (`Black` button / Right Shoulder / Start) to exit.
+
+### Log format
+
+The log file is a single nested JSON document (`schema_version` 1). Every event
+records the source `file` (relative to `src/`) and `line` that emitted it, plus
+`t_ms`, the milliseconds since the suite started:
+
+```json
+{
+  "schema_version": 1,
+  "suite": "SSE",
+  "events": [{"level": "info", "message": "Mounted Drive E: ...", "file": "test_runner.cpp", "line": 111, "t_ms": 0}],
+  "tests": [
+    {
+      "name": "SSE Min/Max Non-IEEE Rules",
+      "source": "sse_tests/test_sse_min_max.h",
+      "started_ms": 12,
+      "events": [
+        {"level": "pass", "message": "minss(NaN, 1.0f) == 1.0f (0x3F800000)", "file": "sse_tests/test_sse_min_max.cpp", "line": 76, "t_ms": 13},
+        {"level": "fail", "message": "...", "file": "...", "line": 90, "t_ms": 13,
+         "fields": {"op": "minss", "expected": "0x7FC00000", "actual": "0x3F800000"}},
+        {"scope": "Double precision (PC = 10b)", "file": "...", "line": 62, "t_ms": 14, "events": []}
+      ],
+      "result": "fail",
+      "duration_ms": 3
+    }
+  ],
+  "summary": {"total": 4, "passed": 3, "failed": 1},
+  "duration_ms": 250
+}
+```
+
+Event `level` is one of `pass`, `fail`, `info`, `error`, or `dump` (a hex dump
+with `label`, `size`, and `bytes`). Register and bit-pattern values in `fields`
+are hex strings (e.g. `"0x3F800000"`). The file is appended to (and closed) on
+every write, so if a suite crashes the document is left truncated; the last
+test/event in the file shows how far it got.
 
 
 ## CLion

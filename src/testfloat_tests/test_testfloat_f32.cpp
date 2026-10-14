@@ -7,9 +7,6 @@ extern "C" {
 #include "testfloat_test_common.h"
 
 bool TestFloatF32::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: TestFloat F32 Operations\n");
-
   InitializeTestFloatEnvironment();
   bool pass = true;
 

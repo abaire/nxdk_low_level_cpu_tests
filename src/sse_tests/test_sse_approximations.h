@@ -34,6 +34,7 @@ struct TestSseApproximations {
   static constexpr const char* Name() {
     return "SSE Approximations (rcp/rsqrt)";
   }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

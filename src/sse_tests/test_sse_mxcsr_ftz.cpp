@@ -18,19 +18,18 @@ static void RunDivss(uint32_t out[4], const uint32_t a[4],
 }
 
 bool TestSseMxcsrFtz::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: SSE MXCSR and Flush-to-Zero\n");
-
   const uint32_t orig_mxcsr = ReadMxcsr();
   bool pass = true;
 
   // 1. Check default exception mask state (bits 7-12 must be set: 0x1F80)
-  LogMsg("  Current MXCSR: 0x%08X\n", orig_mxcsr);
+  TEST_INFO_EX(TestFields("mxcsr", Hex32(orig_mxcsr)), "Current MXCSR: 0x%08X",
+               orig_mxcsr);
   if ((orig_mxcsr & 0x1F80u) == 0x1F80u) {
-    LogMsg("  [PASS] All SIMD exceptions masked in MXCSR (0x1F80)\n");
+    TEST_PASS("All SIMD exceptions masked in MXCSR (0x1F80)");
   } else {
-    LogMsg("  [FAIL] Expected exception masks (0x1F80) not set: 0x%08X\n",
-           orig_mxcsr);
+    TEST_FAIL_EX(
+        TestFields("expected_mask", Hex32(0x1F80u), "mxcsr", Hex32(orig_mxcsr)),
+        "Expected exception masks (0x1F80) not set: 0x%08X", orig_mxcsr);
     pass = false;
   }
 
@@ -51,14 +50,17 @@ bool TestSseMxcsrFtz::Test() {
 
   // Denormalized result expected: 0x00400000 (2^-127)
   if (out[0] == 0x00400000) {
-    LogMsg("  [PASS] FTZ=0 produced denormal 0x%08X\n", out[0]);
+    TEST_PASS("FTZ=0 produced denormal 0x%08X", out[0]);
   } else {
-    LogMsg("  [FAIL] FTZ=0 expected denormal 0x00400000 got 0x%08X\n", out[0]);
+    TEST_FAIL_EX(
+        TestFields("expected", Hex32(0x00400000u), "actual", Hex32(out[0])),
+        "FTZ=0 expected denormal 0x00400000 got 0x%08X", out[0]);
     pass = false;
   }
 
   // Underflow (bit 4, 0x10) sticky flag may be set depending on processor
-  LogMsg("  FTZ=0 sticky flags: 0x%02X\n", mxcsr_res1 & 0x3Fu);
+  TEST_INFO_EX(TestFields("mxcsr_flags", Hex32(mxcsr_res1 & 0x3Fu)),
+               "FTZ=0 sticky flags: 0x%02X", mxcsr_res1 & 0x3Fu);
 
   // 3. Test with FTZ enabled (bit 15 = 1)
   uint32_t mxcsr_with_ftz = (orig_mxcsr & ~0x003Fu) | 0x8000u | 0x1F80u;
@@ -68,9 +70,10 @@ bool TestSseMxcsrFtz::Test() {
 
   // Result should flush to 0 (+0.0f = 0x00000000)
   if (out[0] == 0x00000000) {
-    LogMsg("  [PASS] FTZ=1 flushed to zero (0x%08X)\n", out[0]);
+    TEST_PASS("FTZ=1 flushed to zero (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] FTZ=1 expected 0x00000000 got 0x%08X\n", out[0]);
+    TEST_FAIL_EX(TestFields("expected", Hex32(0u), "actual", Hex32(out[0])),
+                 "FTZ=1 expected 0x00000000 got 0x%08X", out[0]);
     pass = false;
   }
 
@@ -78,10 +81,12 @@ bool TestSseMxcsrFtz::Test() {
   // set
   uint32_t ftz_sticky = mxcsr_res2 & 0x30u;
   if (ftz_sticky == 0x30u) {
-    LogMsg("  [PASS] FTZ=1 set UE (bit 4) and PE (bit 5) in MXCSR (0x%02X)\n",
-           ftz_sticky);
+    TEST_PASS("FTZ=1 set UE (bit 4) and PE (bit 5) in MXCSR (0x%02X)",
+              ftz_sticky);
   } else {
-    LogMsg("  [FAIL] FTZ=1 expected UE and PE (0x30) got 0x%02X\n", ftz_sticky);
+    TEST_FAIL_EX(TestFields("expected_flags", Hex32(0x30u), "actual_flags",
+                            Hex32(ftz_sticky)),
+                 "FTZ=1 expected UE and PE (0x30) got 0x%02X", ftz_sticky);
     pass = false;
   }
 
@@ -96,25 +101,24 @@ bool TestSseMxcsrFtz::Test() {
   __asm__ __volatile__("fxsave [%0]\n\t" : : "r"(fxsave_region) : "memory");
 
   uint32_t mxcsr_mask = *reinterpret_cast<uint32_t*>(&fxsave_region[28]);
-  LogMsg("  FXSAVE MXCSR_MASK: 0x%08X\n", mxcsr_mask);
+  TEST_INFO_EX(TestFields("mxcsr_mask", Hex32(mxcsr_mask)),
+               "FXSAVE MXCSR_MASK: 0x%08X", mxcsr_mask);
 
   if ((mxcsr_mask & 0x0040u) == 0) {
-    LogMsg(
-        "  [PASS] DAZ (bit 6) in MXCSR_MASK is 0 (unsupported on Coppermine; "
-        "reserved)\n");
+    TEST_PASS(
+        "DAZ (bit 6) in MXCSR_MASK is 0 (unsupported on Coppermine; reserved)");
   } else {
-    LogMsg(
-        "  [NOTE] DAZ (bit 6) in MXCSR_MASK is 1 (supported on non-Coppermine "
-        "or "
-        "emulator)\n");
+    TEST_INFO(
+        "[NOTE] DAZ (bit 6) in MXCSR_MASK is 1 (supported on non-Coppermine or "
+        "emulator)");
   }
 
   // 5. Restore original MXCSR
   WriteMxcsr(orig_mxcsr);
   if (ReadMxcsr() == orig_mxcsr) {
-    LogMsg("  [PASS] Restored original MXCSR\n");
+    TEST_PASS("Restored original MXCSR");
   } else {
-    LogMsg("  [FAIL] Failed to restore original MXCSR\n");
+    TEST_FAIL("Failed to restore original MXCSR");
     pass = false;
   }
 

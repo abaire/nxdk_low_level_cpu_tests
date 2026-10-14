@@ -25,6 +25,7 @@ struct TestFpuX87PrecisionControl {
   static constexpr const char* Name() {
     return "X87 fld/fstp Precision Control";
   }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

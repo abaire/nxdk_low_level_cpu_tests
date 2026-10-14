@@ -6,12 +6,9 @@
 #include <windows.h>
 
 #include <cstdint>
-#include <deque>
 #include <string>
 
-void LogMsg(const char* fmt, ...);
-const std::deque<std::string>& GetOnScreenLog();
-void ClearOnScreenLog();
+#include "test_log.h"
 
 inline void Emms() { __asm__ __volatile__("emms" ::: "memory"); }
 

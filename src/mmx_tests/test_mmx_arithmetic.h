@@ -28,6 +28,7 @@
 //!    0x80000000 when all four inputs are -32768.
 struct TestMmxArithmetic {
   static constexpr const char* Name() { return "MMX Packed Arithmetic"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

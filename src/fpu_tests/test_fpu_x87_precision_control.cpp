@@ -35,9 +35,6 @@ static void CopyQwordViaX87(uint64_t& dst, const uint64_t& src) {
 }
 
 bool TestFpuX87PrecisionControl::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: X87 fld/fstp Precision Control\n");
-
   // 64-bit patterns whose low 29 bits are non-zero.
   static constexpr uint64_t kPatterns[] = {
       0xc80008f8c0023c2fULL,  // Actual Mega Man 2 packed sprite entry.
@@ -61,7 +58,7 @@ bool TestFpuX87PrecisionControl::Test() {
     const uint16_t cw =
         static_cast<uint16_t>((original_cw & ~0x0300) | mode.pc_bits);
     WriteFpuControlWord(cw);
-    LogMsg("  %s\n", mode.name);
+    TEST_SCOPE(mode.name);
 
     for (const auto& pattern : kPatterns) {
       uint64_t dst = 0;
@@ -69,12 +66,15 @@ bool TestFpuX87PrecisionControl::Test() {
       CopyQwordViaX87(dst, src);
 
       if (dst == src) {
-        LogMsg("  [PASS] qword copy preserved: 0x%08x%08x\n",
-               static_cast<unsigned>(dst >> 32), static_cast<unsigned>(dst));
+        TEST_PASS("qword copy preserved: 0x%08x%08x",
+                  static_cast<unsigned>(dst >> 32), static_cast<unsigned>(dst));
       } else {
-        LogMsg("  [FAIL] qword copy 0x%08x%08x != 0x%08x%08x\n",
-               static_cast<unsigned>(dst >> 32), static_cast<unsigned>(dst),
-               static_cast<unsigned>(src >> 32), static_cast<unsigned>(src));
+        TEST_FAIL_EX(
+            TestFields("precision_control", mode.name, "expected", Hex64(src),
+                       "actual", Hex64(dst)),
+            "qword copy 0x%08x%08x != 0x%08x%08x",
+            static_cast<unsigned>(dst >> 32), static_cast<unsigned>(dst),
+            static_cast<unsigned>(src >> 32), static_cast<unsigned>(src));
         pass = false;
       }
     }
@@ -82,11 +82,9 @@ bool TestFpuX87PrecisionControl::Test() {
 
   WriteFpuControlWord(original_cw);
   if (ReadFpuControlWord() == original_cw && ReadFpuStackEmpty()) {
-    LogMsg("  [PASS] FPU control word restored; register stack empty\n");
+    TEST_PASS("FPU control word restored; register stack empty");
   } else {
-    LogMsg(
-        "  [FAIL] FPU control word not restored or register stack not "
-        "empty\n");
+    TEST_FAIL("FPU control word not restored or register stack not empty");
     pass = false;
   }
 

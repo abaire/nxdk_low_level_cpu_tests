@@ -54,9 +54,6 @@ static void RunMaxps(uint32_t out[4], const uint32_t a[4],
 }
 
 bool TestSseMinMax::Test() {
-  LogMsg("\n============================================================\n");
-  LogMsg("Test: SSE Min/Max Non-IEEE Rules\n");
-
   static constexpr uint32_t kNaN = 0x7FC00000;      // Quiet NaN
   static constexpr uint32_t kOne = 0x3F800000;      // 1.0f
   static constexpr uint32_t kPosZero = 0x00000000;  // +0.0f
@@ -75,10 +72,11 @@ bool TestSseMinMax::Test() {
   b[1] = b[2] = b[3] = 0;
   RunMinss(out, a, b);
   if (out[0] == kOne) {
-    LogMsg("  [PASS] minss(NaN, 1.0f) == 1.0f (0x%08X)\n", out[0]);
+    TEST_PASS("minss(NaN, 1.0f) == 1.0f (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] minss(NaN, 1.0f) expected 0x%08X got 0x%08X\n", kOne,
-           out[0]);
+    TEST_FAIL_EX(TestFields("op", "minss", "expected", Hex32(kOne), "actual",
+                            Hex32(out[0])),
+                 "minss(NaN, 1.0f) expected 0x%08X got 0x%08X", kOne, out[0]);
     pass = false;
   }
 
@@ -87,10 +85,11 @@ bool TestSseMinMax::Test() {
   b[0] = kNaN;
   RunMinss(out, a, b);
   if (out[0] == kNaN) {
-    LogMsg("  [PASS] minss(1.0f, NaN) == NaN (0x%08X)\n", out[0]);
+    TEST_PASS("minss(1.0f, NaN) == NaN (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] minss(1.0f, NaN) expected 0x%08X got 0x%08X\n", kNaN,
-           out[0]);
+    TEST_FAIL_EX(TestFields("op", "minss", "expected", Hex32(kNaN), "actual",
+                            Hex32(out[0])),
+                 "minss(1.0f, NaN) expected 0x%08X got 0x%08X", kNaN, out[0]);
     pass = false;
   }
 
@@ -99,10 +98,12 @@ bool TestSseMinMax::Test() {
   b[0] = kNegZero;
   RunMinss(out, a, b);
   if (out[0] == kNegZero) {
-    LogMsg("  [PASS] minss(+0.0f, -0.0f) == -0.0f (0x%08X)\n", out[0]);
+    TEST_PASS("minss(+0.0f, -0.0f) == -0.0f (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] minss(+0.0f, -0.0f) expected 0x%08X got 0x%08X\n",
-           kNegZero, out[0]);
+    TEST_FAIL_EX(TestFields("op", "minss", "expected", Hex32(kNegZero),
+                            "actual", Hex32(out[0])),
+                 "minss(+0.0f, -0.0f) expected 0x%08X got 0x%08X", kNegZero,
+                 out[0]);
     pass = false;
   }
 
@@ -111,10 +112,12 @@ bool TestSseMinMax::Test() {
   b[0] = kPosZero;
   RunMinss(out, a, b);
   if (out[0] == kPosZero) {
-    LogMsg("  [PASS] minss(-0.0f, +0.0f) == +0.0f (0x%08X)\n", out[0]);
+    TEST_PASS("minss(-0.0f, +0.0f) == +0.0f (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] minss(-0.0f, +0.0f) expected 0x%08X got 0x%08X\n",
-           kPosZero, out[0]);
+    TEST_FAIL_EX(TestFields("op", "minss", "expected", Hex32(kPosZero),
+                            "actual", Hex32(out[0])),
+                 "minss(-0.0f, +0.0f) expected 0x%08X got 0x%08X", kPosZero,
+                 out[0]);
     pass = false;
   }
 
@@ -123,10 +126,11 @@ bool TestSseMinMax::Test() {
   b[0] = kOne;
   RunMaxss(out, a, b);
   if (out[0] == kOne) {
-    LogMsg("  [PASS] maxss(NaN, 1.0f) == 1.0f (0x%08X)\n", out[0]);
+    TEST_PASS("maxss(NaN, 1.0f) == 1.0f (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] maxss(NaN, 1.0f) expected 0x%08X got 0x%08X\n", kOne,
-           out[0]);
+    TEST_FAIL_EX(TestFields("op", "maxss", "expected", Hex32(kOne), "actual",
+                            Hex32(out[0])),
+                 "maxss(NaN, 1.0f) expected 0x%08X got 0x%08X", kOne, out[0]);
     pass = false;
   }
 
@@ -135,10 +139,11 @@ bool TestSseMinMax::Test() {
   b[0] = kNaN;
   RunMaxss(out, a, b);
   if (out[0] == kNaN) {
-    LogMsg("  [PASS] maxss(1.0f, NaN) == NaN (0x%08X)\n", out[0]);
+    TEST_PASS("maxss(1.0f, NaN) == NaN (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] maxss(1.0f, NaN) expected 0x%08X got 0x%08X\n", kNaN,
-           out[0]);
+    TEST_FAIL_EX(TestFields("op", "maxss", "expected", Hex32(kNaN), "actual",
+                            Hex32(out[0])),
+                 "maxss(1.0f, NaN) expected 0x%08X got 0x%08X", kNaN, out[0]);
     pass = false;
   }
 
@@ -147,10 +152,12 @@ bool TestSseMinMax::Test() {
   b[0] = kNegZero;
   RunMaxss(out, a, b);
   if (out[0] == kNegZero) {
-    LogMsg("  [PASS] maxss(+0.0f, -0.0f) == -0.0f (0x%08X)\n", out[0]);
+    TEST_PASS("maxss(+0.0f, -0.0f) == -0.0f (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] maxss(+0.0f, -0.0f) expected 0x%08X got 0x%08X\n",
-           kNegZero, out[0]);
+    TEST_FAIL_EX(TestFields("op", "maxss", "expected", Hex32(kNegZero),
+                            "actual", Hex32(out[0])),
+                 "maxss(+0.0f, -0.0f) expected 0x%08X got 0x%08X", kNegZero,
+                 out[0]);
     pass = false;
   }
 
@@ -159,10 +166,12 @@ bool TestSseMinMax::Test() {
   b[0] = kPosZero;
   RunMaxss(out, a, b);
   if (out[0] == kPosZero) {
-    LogMsg("  [PASS] maxss(-0.0f, +0.0f) == +0.0f (0x%08X)\n", out[0]);
+    TEST_PASS("maxss(-0.0f, +0.0f) == +0.0f (0x%08X)", out[0]);
   } else {
-    LogMsg("  [FAIL] maxss(-0.0f, +0.0f) expected 0x%08X got 0x%08X\n",
-           kPosZero, out[0]);
+    TEST_FAIL_EX(TestFields("op", "maxss", "expected", Hex32(kPosZero),
+                            "actual", Hex32(out[0])),
+                 "maxss(-0.0f, +0.0f) expected 0x%08X got 0x%08X", kPosZero,
+                 out[0]);
     pass = false;
   }
 
@@ -178,13 +187,15 @@ bool TestSseMinMax::Test() {
   RunMinps(out, a, b);
   if (out[0] == kOne && out[1] == kNaN && out[2] == kNegZero &&
       out[3] == kPosZero) {
-    LogMsg(
-        "  [PASS] minps vector [1.0f, NaN, -0.0f, +0.0f] "
-        "(0x%08X,0x%08X,0x%08X,0x%08X)\n",
+    TEST_PASS(
+        "minps vector [1.0f, NaN, -0.0f, +0.0f] (0x%08X,0x%08X,0x%08X,0x%08X)",
         out[0], out[1], out[2], out[3]);
   } else {
-    LogMsg("  [FAIL] minps vector mismatch got (0x%08X,0x%08X,0x%08X,0x%08X)\n",
-           out[0], out[1], out[2], out[3]);
+    TEST_FAIL_EX(TestFields("op", "minps", "actual0", Hex32(out[0]), "actual1",
+                            Hex32(out[1]), "actual2", Hex32(out[2]), "actual3",
+                            Hex32(out[3])),
+                 "minps vector mismatch got (0x%08X,0x%08X,0x%08X,0x%08X)",
+                 out[0], out[1], out[2], out[3]);
     pass = false;
   }
 
@@ -192,13 +203,15 @@ bool TestSseMinMax::Test() {
   RunMaxps(out, a, b);
   if (out[0] == kOne && out[1] == kNaN && out[2] == kNegZero &&
       out[3] == kPosZero) {
-    LogMsg(
-        "  [PASS] maxps vector [1.0f, NaN, -0.0f, +0.0f] "
-        "(0x%08X,0x%08X,0x%08X,0x%08X)\n",
+    TEST_PASS(
+        "maxps vector [1.0f, NaN, -0.0f, +0.0f] (0x%08X,0x%08X,0x%08X,0x%08X)",
         out[0], out[1], out[2], out[3]);
   } else {
-    LogMsg("  [FAIL] maxps vector mismatch got (0x%08X,0x%08X,0x%08X,0x%08X)\n",
-           out[0], out[1], out[2], out[3]);
+    TEST_FAIL_EX(TestFields("op", "maxps", "actual0", Hex32(out[0]), "actual1",
+                            Hex32(out[1]), "actual2", Hex32(out[2]), "actual3",
+                            Hex32(out[3])),
+                 "maxps vector mismatch got (0x%08X,0x%08X,0x%08X,0x%08X)",
+                 out[0], out[1], out[2], out[3]);
     pass = false;
   }
 

@@ -20,6 +20,7 @@
 //! 5. The original MXCSR register contents are restored upon test completion.
 struct TestSseMxcsrFtz {
   static constexpr const char* Name() { return "SSE MXCSR and Flush-to-Zero"; }
+  static constexpr const char* Source() { return __FILE__; }
   static bool Test();
 };
 

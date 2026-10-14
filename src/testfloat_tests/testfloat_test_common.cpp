@@ -1,49 +1,11 @@
 #include "testfloat_test_common.h"
 
-#include <cstdarg>
-#include <cstdio>
-
-#include "logger.h"
-#include "printf/printf.h"
-
 extern "C" {
 #include "genCases.h"
 #include "subjfloat.h"
 #include "testLoops.h"
 #include "verCases.h"
 }
-
-static std::deque<std::string> g_on_screen_log;
-static constexpr size_t kMaxOnScreenLogLines = 18;
-
-void LogMsg(const char* fmt, ...) {
-  char buf[512];
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf_(buf, sizeof(buf), fmt, args);
-  va_end(args);
-
-  DbgPrint("%s", buf);
-
-  if (Logger::IsInitialized()) {
-    Logger::Log() << buf;
-  }
-
-  std::string s(buf);
-  while (!s.empty() && (s.back() == '\n' || s.back() == '\r')) {
-    s.pop_back();
-  }
-  if (!s.empty()) {
-    g_on_screen_log.push_back(s);
-    if (g_on_screen_log.size() > kMaxOnScreenLogLines) {
-      g_on_screen_log.pop_front();
-    }
-  }
-}
-
-const std::deque<std::string>& GetOnScreenLog() { return g_on_screen_log; }
-
-void ClearOnScreenLog() { g_on_screen_log.clear(); }
 
 void InitializeTestFloatEnvironment() {
   testLoops_trueFlagsPtr = &softfloat_exceptionFlags;
@@ -92,14 +54,17 @@ bool RunTestFloatBinaryF32(const char* name,
     test_abz_f32(true_fn, subj_fn);
 
     if (verCases_errorCount > 0) {
-      LogMsg("  [FAIL] %s (%s): %u error(s)\n", name, RoundingModeName(mode),
-             static_cast<unsigned>(verCases_errorCount));
+      TEST_FAIL_EX(
+          TestFields("function", name, "rounding_mode", RoundingModeName(mode),
+                     "errors", static_cast<unsigned>(verCases_errorCount)),
+          "%s (%s): %u error(s)", name, RoundingModeName(mode),
+          static_cast<unsigned>(verCases_errorCount));
       all_pass = false;
     }
   }
 
   if (all_pass) {
-    LogMsg("  [PASS] %s across all rounding modes\n", name);
+    TEST_PASS("%s across all rounding modes", name);
   }
   return all_pass;
 }
@@ -118,14 +83,17 @@ bool RunTestFloatUnaryF32(const char* name, float32_t (*true_fn)(float32_t),
     test_az_f32(true_fn, subj_fn);
 
     if (verCases_errorCount > 0) {
-      LogMsg("  [FAIL] %s (%s): %u error(s)\n", name, RoundingModeName(mode),
-             static_cast<unsigned>(verCases_errorCount));
+      TEST_FAIL_EX(
+          TestFields("function", name, "rounding_mode", RoundingModeName(mode),
+                     "errors", static_cast<unsigned>(verCases_errorCount)),
+          "%s (%s): %u error(s)", name, RoundingModeName(mode),
+          static_cast<unsigned>(verCases_errorCount));
       all_pass = false;
     }
   }
 
   if (all_pass) {
-    LogMsg("  [PASS] %s across all rounding modes\n", name);
+    TEST_PASS("%s across all rounding modes", name);
   }
   return all_pass;
 }
@@ -142,11 +110,13 @@ bool RunTestFloatCompareF32(const char* name,
   test_ab_f32_z_bool(true_fn, subj_fn);
 
   if (verCases_errorCount > 0) {
-    LogMsg("  [FAIL] %s: %u error(s)\n", name,
-           static_cast<unsigned>(verCases_errorCount));
+    TEST_FAIL_EX(TestFields("function", name, "errors",
+                            static_cast<unsigned>(verCases_errorCount)),
+                 "%s: %u error(s)", name,
+                 static_cast<unsigned>(verCases_errorCount));
     return false;
   }
-  LogMsg("  [PASS] %s\n", name);
+  TEST_PASS("%s", name);
   return true;
 }
 
@@ -165,14 +135,17 @@ bool RunTestFloatBinaryF64(const char* name,
     test_abz_f64(true_fn, subj_fn);
 
     if (verCases_errorCount > 0) {
-      LogMsg("  [FAIL] %s (%s): %u error(s)\n", name, RoundingModeName(mode),
-             static_cast<unsigned>(verCases_errorCount));
+      TEST_FAIL_EX(
+          TestFields("function", name, "rounding_mode", RoundingModeName(mode),
+                     "errors", static_cast<unsigned>(verCases_errorCount)),
+          "%s (%s): %u error(s)", name, RoundingModeName(mode),
+          static_cast<unsigned>(verCases_errorCount));
       all_pass = false;
     }
   }
 
   if (all_pass) {
-    LogMsg("  [PASS] %s across all rounding modes\n", name);
+    TEST_PASS("%s across all rounding modes", name);
   }
   return all_pass;
 }
@@ -191,14 +164,17 @@ bool RunTestFloatUnaryF64(const char* name, float64_t (*true_fn)(float64_t),
     test_az_f64(true_fn, subj_fn);
 
     if (verCases_errorCount > 0) {
-      LogMsg("  [FAIL] %s (%s): %u error(s)\n", name, RoundingModeName(mode),
-             static_cast<unsigned>(verCases_errorCount));
+      TEST_FAIL_EX(
+          TestFields("function", name, "rounding_mode", RoundingModeName(mode),
+                     "errors", static_cast<unsigned>(verCases_errorCount)),
+          "%s (%s): %u error(s)", name, RoundingModeName(mode),
+          static_cast<unsigned>(verCases_errorCount));
       all_pass = false;
     }
   }
 
   if (all_pass) {
-    LogMsg("  [PASS] %s across all rounding modes\n", name);
+    TEST_PASS("%s across all rounding modes", name);
   }
   return all_pass;
 }
@@ -215,11 +191,13 @@ bool RunTestFloatCompareF64(const char* name,
   test_ab_f64_z_bool(true_fn, subj_fn);
 
   if (verCases_errorCount > 0) {
-    LogMsg("  [FAIL] %s: %u error(s)\n", name,
-           static_cast<unsigned>(verCases_errorCount));
+    TEST_FAIL_EX(TestFields("function", name, "errors",
+                            static_cast<unsigned>(verCases_errorCount)),
+                 "%s: %u error(s)", name,
+                 static_cast<unsigned>(verCases_errorCount));
     return false;
   }
-  LogMsg("  [PASS] %s\n", name);
+  TEST_PASS("%s", name);
   return true;
 }
 
@@ -245,16 +223,20 @@ bool RunTestFloatBinaryExtF80(
       test_abz_extF80(true_fn, subj_fn);
 
       if (verCases_errorCount > 0) {
-        LogMsg("  [FAIL] %s (prec %u, %s): %u error(s)\n", name,
-               static_cast<unsigned>(prec), RoundingModeName(mode),
-               static_cast<unsigned>(verCases_errorCount));
+        TEST_FAIL_EX(TestFields("function", name, "precision",
+                                static_cast<unsigned>(prec), "rounding_mode",
+                                RoundingModeName(mode), "errors",
+                                static_cast<unsigned>(verCases_errorCount)),
+                     "%s (prec %u, %s): %u error(s)", name,
+                     static_cast<unsigned>(prec), RoundingModeName(mode),
+                     static_cast<unsigned>(verCases_errorCount));
         all_pass = false;
       }
     }
   }
 
   if (all_pass) {
-    LogMsg("  [PASS] %s across all precision & rounding modes\n", name);
+    TEST_PASS("%s across all precision & rounding modes", name);
   }
   return all_pass;
 }
@@ -280,16 +262,20 @@ bool RunTestFloatUnaryExtF80(
       test_az_extF80(true_fn, subj_fn);
 
       if (verCases_errorCount > 0) {
-        LogMsg("  [FAIL] %s (prec %u, %s): %u error(s)\n", name,
-               static_cast<unsigned>(prec), RoundingModeName(mode),
-               static_cast<unsigned>(verCases_errorCount));
+        TEST_FAIL_EX(TestFields("function", name, "precision",
+                                static_cast<unsigned>(prec), "rounding_mode",
+                                RoundingModeName(mode), "errors",
+                                static_cast<unsigned>(verCases_errorCount)),
+                     "%s (prec %u, %s): %u error(s)", name,
+                     static_cast<unsigned>(prec), RoundingModeName(mode),
+                     static_cast<unsigned>(verCases_errorCount));
         all_pass = false;
       }
     }
   }
 
   if (all_pass) {
-    LogMsg("  [PASS] %s across all precision & rounding modes\n", name);
+    TEST_PASS("%s across all precision & rounding modes", name);
   }
   return all_pass;
 }
@@ -308,10 +294,12 @@ bool RunTestFloatCompareExtF80(
   test_ab_extF80_z_bool(true_fn, subj_fn);
 
   if (verCases_errorCount > 0) {
-    LogMsg("  [FAIL] %s: %u error(s)\n", name,
-           static_cast<unsigned>(verCases_errorCount));
+    TEST_FAIL_EX(TestFields("function", name, "errors",
+                            static_cast<unsigned>(verCases_errorCount)),
+                 "%s: %u error(s)", name,
+                 static_cast<unsigned>(verCases_errorCount));
     return false;
   }
-  LogMsg("  [PASS] %s\n", name);
+  TEST_PASS("%s", name);
   return true;
 }
