@@ -15,7 +15,11 @@ on one specific piece of hardware.***
 * fpu_test - tests basic single- and double-precision FPU arithmetic, plus an
   x87 `fld`/`fstp` precision-control regression test (verifies that 64-bit
   `fld qword` / `fstp qword` copies are unaffected by the FPU control word's
-  precision-control field, as required by the Intel x86 Architecture Manual).
+  precision-control field, as required by the Intel x86 Architecture Manual)
+  and a single-precision (PC = 00b) arithmetic rounding test (verifies that
+  `fadd`/`fsub`/`fmul`/`fdiv` with `qword` operands round the exact result
+  once to 24 bits, catching emulators that round to binary64 first and then
+  narrow, i.e. double rounding near halfway points).
 * sse_test - tests original SSE (SSE1) single-precision floating point behavior:
   - Non-IEEE Min/Max operand rules (`minss`, `maxss`, `minps`, `maxps`) for NaNs
     and signed zeros (`+0.0` vs `-0.0`).
