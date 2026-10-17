@@ -14,6 +14,7 @@ static const char* kDefaultLogPath =
 static constexpr TestCase kTests[] = {
     TestCase::From<TestFpuBasicArithmetic>(),
     TestCase::From<TestFpuX87PrecisionControl>(),
+    TestCase::From<TestFpuX87PrecisionControlArithmetic>(),
 };
 
 int main() {

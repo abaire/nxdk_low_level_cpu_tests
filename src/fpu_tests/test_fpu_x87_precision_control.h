@@ -29,4 +29,36 @@ struct TestFpuX87PrecisionControl {
   static bool Test();
 };
 
+//! Regression test for x87 arithmetic rounding under single-precision
+//! precision control (PC = 00b) with round-to-nearest-even and 64-bit
+//! (`qword`) memory operands.
+//!
+//! Hardware computes the exact result of `FADD`/`FSUB`/`FMUL`/`FDIV` and
+//! rounds it once to a 24-bit significand. An emulator that computes the
+//! result in binary64 and then narrows it to 24 bits rounds twice, which
+//! gives the wrong answer when the exact result lies just off a 24-bit
+//! halfway point by less than half a binary64 ulp: the first rounding lands
+//! exactly on the halfway point and ties-to-even then picks the wrong
+//! neighbor.
+//!
+//! Validates that, with PC = 00b and RC = 00b, `fld qword` / `<op> qword` /
+//! `fstp qword` produces the singly rounded 24-bit result for:
+//! 1. `fsub` and `fadd` whose exact result is just above a 24-bit halfway
+//!    point (double rounding would round down to even).
+//! 2. `fsub` whose exact result is just below a 24-bit halfway point (double
+//!    rounding would round up to even).
+//! 3. `fmul` whose exact product is just above and just below a 24-bit
+//!    halfway point.
+//! 4. `fdiv` whose exact (non-terminating) quotient is just above and just
+//!    below a 24-bit halfway point.
+//! 5. After the test, the original FPU control word is restored and the FPU
+//!    register stack is empty.
+struct TestFpuX87PrecisionControlArithmetic {
+  static constexpr const char* Name() {
+    return "X87 Single Precision Control Arithmetic Rounding";
+  }
+  static constexpr const char* Source() { return __FILE__; }
+  static bool Test();
+};
+
 #endif  // NXDK_LOW_LEVEL_CPU_TESTS_TEST_FPU_X87_PRECISION_CONTROL_H
